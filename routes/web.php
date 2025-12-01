@@ -6,8 +6,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AdminController;
-
-;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Mail\Message;
 
 Route::get('/', [AuthController::class, 'index'])->name('user.home');
 
@@ -19,10 +19,13 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('user.logout');
 
 Route::get('/listroom', [AuthController::class, 'listRoom'])->name('user.listroom');
 Route::get('/room/{id}', [AuthController::class, 'detailRoom'])->name('user.detailroom');
+Route::get('/history', [AuthController::class, 'history'])->name('user.history');
 
 Route::middleware(['auth'])->group(function() {
     Route::get('/booking', [AuthController::class, 'bookingroom'])->name('user.booking');
-    Route::get('/booking/proses',[AuthController::class, 'prosesBooking'])->name('user.booking.proses');
+    Route::post('/booking/store', [AuthController::class, 'storeBooking'])->name('user.booking.store');
+    Route::get('/booking/konfirmasi', [AuthController::class, 'confirmBooking'])->name('user.booking.konfirmasi');
+
 });
 
 // Payment route
@@ -64,3 +67,18 @@ Route::get('/admin/penghuni/edit/{id}', [AdminController::class, 'editPenghuni']
 Route::post('/admin/penghuni/update/{id}', [AdminController::class, 'updatePenghuni'])->name('penghuni.update');
 
 Route::delete('/admin/penghuni/destroy/{id}', [AdminController::class, 'destroyPenghuni'])->name('penghuni.destroy');
+
+// Test Email Hello World sebagai text biasa ke Email faizarachma@gmail.com
+Route::get('test-email', function () {
+    try {
+        Mail::raw('Hello world', function (Message $message) {
+            $message->to('faizarachma@gmail.com');
+        });
+        \Log::info('Email sent successfully.');
+        return 'Email sent successfully!';
+    } catch (\Exception $e) {
+        \Log::error('Email sending failed: ' . $e->getMessage());
+        return 'Email sending failed: ' . $e->getMessage();
+    }
+    return 'Email sent successfully!';
+});

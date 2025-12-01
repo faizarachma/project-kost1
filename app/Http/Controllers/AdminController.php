@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use App\Models\pembayaran;
 
 
 
@@ -158,15 +159,11 @@ class AdminController extends Controller
         }
     }
 
-
-
-
     public function editKamar($id)
     {
         $kamar = KelolaKamar::findOrFail($id);
         return view('admin.room.edit', compact('kamar'));
     }
-
 
 
     public function destroyKamar($id)
@@ -239,17 +236,24 @@ class AdminController extends Controller
     }
 
 
-
-
     public function storePemesanan(Request $request)
     {
+
+        // dd($request->all());
         $validated = $request->validate([
             'penghuni_id' => 'required|exists:users,id',
+            'pemesanan_id' => 'required|exists:kelola_pemesanan,id',
             'kamar_id' => 'required|exists:kelola_kamar,id',
             'tanggal_sewa' => 'required|date',
             'bukti_pembayaran' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
             'status' => 'required|in:Menunggu,Diterima,Ditolak',
         ]);
+
+
+        $kamar = KelolaKamar::find($validated['kamar_id']);
+        if ($kamar->status === 'booked') {
+            return back()->with('error', 'Kamar sudah dipesan.');
+        }
 
         DB::beginTransaction();
         try {
@@ -263,23 +267,21 @@ class AdminController extends Controller
                 'status' => $validated['status'],
             ]);
 
-            // Hanya update status kamar menjadi 'booked' jika status pemesanan 'Diterima'
-            if ($validated['status'] === 'Diterima') {
-                KelolaKamar::where('id', $validated['kamar_id'])->update(['status' => 'booked']);
+            if (in_array($validated['status'], ['Diterima', 'Menunggu'])) {
+                $kamar->update(['status' => 'booked']);
             }
 
             DB::commit();
             return redirect()->route('pemesanan')->with('success', 'Pemesanan berhasil disimpan.');
         } catch (\Exception $e) {
             DB::rollBack();
-
             if (isset($path)) {
                 Storage::disk('public')->delete($path);
             }
-            return back()->withInput()
-                        ->with('error', 'Gagal menyimpan pemesanan: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal menyimpan pemesanan: ' . $e->getMessage());
         }
     }
+
 
     public function updatePemesanan(Request $request, $id)
     {
@@ -310,11 +312,20 @@ class AdminController extends Controller
                 $kamarLama->status = 'available';
                 $kamarLama->save();
 
-                // Update new room status to booked if the status is "Diterima"
-                if ($validated['status'] === 'Diterima') {
+                // Update new room status to booked if the status is "Diterima" or "Menunggu"
+                if ($validated['status'] === 'Diterima' || $validated['status'] === 'Menunggu') {
                     $kamarBaru->status = 'booked';
                     $kamarBaru->save();
                 }
+            } else {
+                // Jika kamar tidak berubah, update status kamar sesuai status pemesanan
+                $kamar = KelolaKamar::find($validated['kamar_id']);
+                if ($validated['status'] === 'Diterima' || $validated['status'] === 'Menunggu') {
+                    $kamar->status = 'booked';
+                } elseif ($validated['status'] === 'Ditolak') {
+                    $kamar->status = 'available';
+                }
+                $kamar->save();
             }
 
             // Handle file upload for payment proof (optional)

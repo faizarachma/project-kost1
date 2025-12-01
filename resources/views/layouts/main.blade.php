@@ -124,9 +124,15 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#room">Room</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#booking">Booking</a>
-                    </li>
+                    @auth
+                        <li class="nav-item">
+                            <a class="nav-link{{ request()->routeIs('user.history') ? ' active' : '' }}"
+                                href="{{ route('user.history') }}"
+                                style="{{ request()->routeIs('user.history') ? 'border-bottom: 2px solid #4CAF50;' : '' }}">
+                                Booking
+                            </a>
+                        </li>
+                    @endauth
                     <li class="nav-item ms-3">
                         @auth
                             <div class="dropdown">

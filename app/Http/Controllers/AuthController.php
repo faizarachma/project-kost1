@@ -6,7 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\KelolaKamar; // Assuming you have a Room model
+use App\Models\KelolaPemesanan;
 use Illuminate\Support\Facades\Hash;
+use App\Models\KelolaPesanan; // Assuming you have a Booking model
+use App\Models\pembayaran;
 
 
 class AuthController extends Controller
@@ -118,11 +121,11 @@ class AuthController extends Controller
         ]);
     }
 
-    public function prosesBooking(Request $request)
+    public function storeBooking(Request $request)
     {
         // Validasi data
         $validated = $request->validate([
-            'room_id' => 'required|exists:rooms,id',
+            'room_id' => 'required|exists:kamar,id',
             'nama' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'no_hp' => 'required|string|max:20',
@@ -131,24 +134,79 @@ class AuthController extends Controller
             'total_amount' => 'required|numeric'
         ]);
 
-        // Proses penyimpanan data booking
+        // Simpan data booking sementara di session
+        $bookingData = [
+            'user_id' => auth()->id(),
+            'room_id' => $request->room_id,
+            'nama' => $request->nama,
+            'email' => $request->email,
+            'no_hp' => $request->no_hp,
+            'alamat' => $request->alamat,
+            'start_date' => $request->start_date,
+            'total_amount' => $request->total_amount,
+            'status' => 'pending'
+        ];
+
+        session()->put('temp_booking', $bookingData);
+
+        // Redirect ke halaman konfirmasi
+        return redirect()->route('user.booking.konfirmasi');
+    }
+
+    public function showConfirmation()
+    {
+        if (!session()->has('temp_booking')) {
+            return redirect()->route('user.listroom')->with('error', 'Silahkan lakukan booking terlebih dahulu');
+        }
+
+        $bookingData = session('temp_booking');
+        $room = KelolaKamar::find($bookingData['room_id']);
+
+        return view('user.booking.confirmation', [
+            'booking' => $bookingData,
+            'room' => $room
+        ]);
+    }
+
+    public function confirmBooking()
+    {
+        if (!session()->has('temp_booking')) {
+            return redirect()->route('user.listroom')->with('error', 'Silahkan lakukan booking terlebih dahulu');
+        }
+
+        $tempBooking = session('temp_booking');
+
         try {
-            $booking = new Booking();
-            $booking->user_id = auth()->id();
-            $booking->room_id = $request->room_id;
-            $booking->start_date = $request->start_date;
-            $booking->total_amount = $request->total_amount;
-            $booking->status = 'pending'; // atau status awal lainnya
+            $booking = new KelolaPemesanan();
+            $booking->user_id = $tempBooking['user_id'];
+            $booking->room_id = $tempBooking['room_id'];
+            $booking->start_date = $tempBooking['start_date'];
+            $booking->total_amount = $tempBooking['total_amount'];
+            $booking->status = 'pending';
             $booking->save();
 
-            // Redirect ke halaman konfirmasi dengan pesan sukses
-            return redirect()->route('user.booking.confirmation')->with('success', 'Booking berhasil diproses!');
+            // Hapus data sementara setelah berhasil disimpan
+            session()->forget('temp_booking');
 
+            return redirect()->route('user.payment')->with('success', 'Booking berhasil diproses!');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memproses booking: ' . $e->getMessage());
         }
     }
 
+    public function history()
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')
+                ->with('error', 'Silakan login terlebih dahulu untuk melihat riwayat booking.');
+        }
+
+        $user = Auth::user();
+        // Ambil data dari model KelolaPemesanan berdasarkan penghuni_id (user id)
+        $bookings = \App\Models\KelolaPemesanan::where('penghuni_id', $user->id)->with('kamar')->get();
+
+        return view('user.historybook', compact('bookings'));
+    }
 
     public function logout()
     {

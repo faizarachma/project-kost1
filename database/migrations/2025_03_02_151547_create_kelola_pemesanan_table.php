@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('kelola_pemesanan', function (Blueprint $table) {
             $table->id();
+            $table->string('kode_pemesanan')->unique();
             $table->unsignedBigInteger('penghuni_id'); // Relasi ke tabel 'users' untuk penghuni
             $table->unsignedBigInteger('kamar_id'); // Relasi ke tabel 'kelola_kamar' untuk kamar
             $table->date('tanggal_sewa'); // Tanggal sewa
-            $table->string('bukti_pembayaran')->nullable(); // Bukti pembayaran
-            $table->enum('status', ['Menunggu', 'Diterima', 'Ditolak']); // Status pemesanan
+
+
             $table->timestamps();
 
             // Menambahkan foreign key constraint untuk penghuni dan kamar
@@ -33,4 +34,8 @@ return new class extends Migration
     {
         Schema::dropIfExists('kelola_pemesanan');
     }
+
+
+
+
 };

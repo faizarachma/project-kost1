@@ -145,114 +145,111 @@
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <form id="bookingForm" method="POST" action="{{ route('user.booking') }}"
-                    enctype="multipart/form-data">
+                <form action="{{ route('user.booking.store') }}" id="bookingForm" method="POST">
                     @csrf
                     <input type="hidden" name="room_id" value="{{ $room->id }}">
 
-                    <div class="card-header text-center">
-                        <h1 class="room-number mb-0">
-                            Kamar No. <span id="roomNumber">{{ $room->no_kamar ?? 'N/A' }}</span>
-                        </h1>
-                        <p class="mb-0">Kost Alifia</p>
-                    </div>
+                    <div class="card mb-4">
+                        <div class="card-header text-center">
+                            <h1 class="room-number mb-0">
+                                Kamar No. <span id="roomNumber">{{ $room->no_kamar ?? 'N/A' }}</span>
+                            </h1>
+                            <p class="mb-0">Kost Alifia</p>
+                        </div>
 
-                    <img src="{{ $photoUrl }}" class="room-image" alt="Kamar Kost {{ $room->no_kamar ?? '' }}"
-                        onerror="this.onerror=null;this.src='https://via.placeholder.com/800x500?text=Image+Not+Found'">
+                        <img src="{{ $photoUrl }}" class="room-image" alt="Kamar Kost {{ $room->no_kamar ?? '' }}"
+                            onerror="this.onerror=null;this.src='https://via.placeholder.com/800x500?text=Image+Not+Found'">
 
-                    <div class="card-body p-4">
-                        <!-- Data Pemesan Section -->
-                        <div class="mb-4">
-                            <h5 class="mb-3" style="color: var(--primary-color);">
-                                <i class="fas fa-user-circle me-2"></i> Data Pemesan
-                            </h5>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="nama" class="form-label">Nama Lengkap</label>
-                                        <input type="text" class="form-control" id="nama" name="nama"
-                                            value="{{ Auth::user()->name }}" required>
+                        <div class="card-body p-4">
+                            <!-- Data Pemesan Section -->
+                            <div class="mb-4">
+                                <h5 class="mb-3" style="color: var(--primary-color);">
+                                    <i class="fas fa-user-circle me-2"></i> Data Pemesan
+                                </h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="nama" class="form-label">Nama Lengkap</label>
+                                            <input type="text" class="form-control" id="nama" name="nama"
+                                                value="{{ Auth::user()->name }}" required>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="email" class="form-label">Email</label>
-                                        <input type="email" class="form-control" id="email" name="email"
-                                            value="{{ Auth::user()->email }}" required>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="email" name="email"
+                                                value="{{ Auth::user()->email }}" required>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="no_hp" class="form-label">No. HP/WhatsApp</label>
-                                        <input type="tel" class="form-control" id="no_hp" name="no_hp"
-                                            value="{{ Auth::user()->no_hp ?? '' }}" required>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="no_hp" class="form-label">No. HP/WhatsApp</label>
+                                            <input type="tel" class="form-control" id="no_hp" name="no_hp"
+                                                value="{{ Auth::user()->no_hp ?? '' }}" required>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="col-12">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="alamat" class="form-label">Alamat Lengkap</label>
                                             <textarea class="form-control" id="alamat" name="alamat" rows="2" required>{{ Auth::user()->alamat ?? '' }}</textarea>
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
-                        </div>
 
-                        <!-- Existing Room Info Section -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-users me-3"
-                                        style="color: var(--primary-color); font-size: 1.25rem;"></i>
-                                    <div>
-                                        <p class="mb-0 text-muted small">Jumlah Penghuni</p>
-                                        <h5 class="mb-0">1 Orang</h5>
+                            <!-- Room Info Section -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-users me-3"
+                                            style="color: var(--primary-color); font-size: 1.25rem;"></i>
+                                        <div>
+                                            <p class="mb-0 text-muted small">Jumlah Penghuni</p>
+                                            <h5 class="mb-0">1 Orang</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-calendar-alt me-3"
+                                            style="color: var(--primary-color); font-size: 1.25rem;"></i>
+                                        <div>
+                                            <p class="mb-0 text-muted small">Tanggal Mulai Sewa</p>
+                                            <input type="text" class="form-control datepicker" id="startDate"
+                                                name="start_date" required>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-calendar-alt me-3"
-                                        style="color: var(--primary-color); font-size: 1.25rem;"></i>
+
+                            <div class="mb-4 p-4 rounded-3" style="background-color: var(--light-green);">
+                                <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <p class="mb-0 text-muted small">Tanggal Mulai Sewa</p>
-                                        <input type="text" class="form-control datepicker" id="startDate"
-                                            name="start_date" required>
+                                        <h5 class="mb-0">Total Biaya Sewa:</h5>
+                                        <small class="text-muted">(1 bulan x Rp
+                                            {{ number_format($room->harga, 0, ',', '.') }})</small>
                                     </div>
+                                    <div class="total-cost" id="totalCost">
+                                        Rp {{ number_format($room->harga, 0, ',', '.') }}
+                                    </div>
+                                    <input type="hidden" name="total_amount" value="{{ $room->harga }}">
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="mb-4 p-4 rounded-3" style="background-color: var(--light-green);">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="mb-0">Total Biaya Sewa:</h5>
-                                    <small class="text-muted">(1 bulan x Rp
-                                        {{ number_format($room->harga, 0, ',', '.') }})</small>
-                                </div>
-                                <div class="total-cost" id="totalCost">
-                                    Rp {{ number_format($room->harga, 0, ',', '.') }}
-                                </div>
-                                <input type="hidden" name="total_amount" value="{{ $room->harga }}">
+                            <div class="d-flex justify-content-between pt-3">
+                                <a href="{{ route('user.listroom') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i> Kembali
+                                </a>
+                                <a href="{{ route('user.booking.konfirmasi') }}" class="btn btn-primary"
+                                    id="submitButton">
+                                    <i class="fas fa-paper-plane me-2"></i> Booking Sekarang
+                                </a>
                             </div>
-                        </div>
-
-
-                        <div class="d-flex justify-content-between pt-3">
-                            <a href="{{ route('user.listroom') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-times me-2"></i> Kembali
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-paper-plane me-2"></i> Booking Sekarang
-                            </button>
                         </div>
                     </div>
+                </form>
             </div>
-            </form>
         </div>
-    </div>
     </div>
 
     <!-- Terms and Conditions Modal -->
@@ -300,23 +297,6 @@
             const submitButton = document.getElementById('submitButton');
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Memproses...';
             submitButton.disabled = true;
-        });
-
-        // File upload validation
-        document.getElementById('payment_proof').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const maxSize = 2 * 1024 * 1024; // 2MB
-            const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-
-            if (file.size > maxSize) {
-                alert('Ukuran file terlalu besar. Maksimal 2MB');
-                e.target.value = '';
-            }
-
-            if (!validTypes.includes(file.type)) {
-                alert('Format file tidak didukung. Harap upload JPG, PNG, atau PDF');
-                e.target.value = '';
-            }
         });
     </script>
 </body>

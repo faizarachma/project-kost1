@@ -17,8 +17,7 @@ class KelolaPemesanan extends Model
         'penghuni_id',  // ID Penghuni yang melakukan pemesanan
         'kamar_id',     // ID Kamar yang dipesan
         'tanggal_sewa', // Tanggal sewa kamar
-        'bukti_pembayaran', // Bukti pembayaran
-        'status',        // Status pemesanan (Menunggu, Diterima, Ditolak)
+        'kode_pemesanan' // Kode unik untuk pemesanan
     ];
 
     // Relasi ke model User (Penghuni)
@@ -33,5 +32,13 @@ class KelolaPemesanan extends Model
     {
         return $this->belongsTo(KelolaKamar::class, 'kamar_id');  // Kamar yang dipesan
     }
+
+    // Relasi ke model Pembayaran
+    public function pembayaran()
+    {
+        return $this->hasOne(Pembayaran::class, 'pemesanan_id');  // Pembayaran terkait pemesanan
+    }
+
+
 }
 
